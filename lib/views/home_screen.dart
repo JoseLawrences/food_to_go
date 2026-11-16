@@ -1,9 +1,12 @@
 
 import 'package:flutter/material.dart';
+
 import '../viewmodels/food_to_go_viewmodel.dart';
 import '../widgets/low_fi_card.dart';
 import 'menu_screen.dart';
 import 'cart_screen.dart';
+import 'favorites_screen.dart';
+import 'tickets_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final FoodToGoViewModel viewModel;
@@ -54,14 +57,56 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Choose a canteen outlet to browse its menu.',
+            'Choose your favorite food and order ahead.',
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.favorite_border),
+                  label: const Text('Favorites'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FavoritesScreen(
+                          viewModel: viewModel,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.receipt_long),
+                  label: const Text('My Tickets'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TicketsScreen(
+                          viewModel: viewModel,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
           const Text(
             'AVAILABLE OUTLETS',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
+
           ...viewModel.outlets.map((outlet) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
