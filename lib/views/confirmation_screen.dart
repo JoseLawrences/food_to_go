@@ -1,13 +1,18 @@
 
 import 'package:flutter/material.dart';
+
+import '../models/order_ticket.dart';
 import '../viewmodels/food_to_go_viewmodel.dart';
 import '../widgets/low_fi_card.dart';
+import 'tickets_screen.dart';
 
 class ConfirmationScreen extends StatelessWidget {
+  final OrderTicket ticket;
   final FoodToGoViewModel viewModel;
 
   const ConfirmationScreen({
     super.key,
+    required this.ticket,
     required this.viewModel,
   });
 
@@ -19,7 +24,7 @@ class ConfirmationScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: LowFiCard(
             child: Column(
@@ -37,27 +42,79 @@ class ConfirmationScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                const Text('Your order ticket has been saved.'),
+                const Divider(color: Colors.black),
                 const Text(
-                  'Your sample order has been confirmed.',
-                  textAlign: TextAlign.center,
+                  'YOUR TICKET NUMBER',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                SelectableText(
+                  ticket.ticketId,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...ticket.items.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${item.quantity}x ${item.name}',
+                          ),
+                        ),
+                        Text(
+                          'PHP ${item.subtotal.toStringAsFixed(2)}',
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const Divider(color: Colors.black),
+                Text(
+                  'TOTAL: PHP ${ticket.total.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'This is a prototype. No real payment or order '
-                  'submission is performed.',
-                  textAlign: TextAlign.center,
-                ),
+                const Text('Status: PENDING'),
                 const SizedBox(height: 20),
-                WireframeButton(
-                  label: 'Back to Home',
-                  onPressed: () {
-                    viewModel.placeOrder();
-                    Navigator.popUntil(
-                      context,
-                      (route) => route.isFirst,
-                    );
-                  },
+                SizedBox(
+                  width: double.infinity,
+                  child: WireframeButton(
+                    label: 'VIEW MY TICKETS',
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TicketsScreen(
+                            viewModel: viewModel,
+                          ),
+                        ),
+                        (route) => route.isFirst,
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: WireframeButton(
+                    label: 'BACK TO HOME',
+                    onPressed: () {
+                      Navigator.popUntil(
+                        context,
+                        (route) => route.isFirst,
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+
 import '../viewmodels/food_to_go_viewmodel.dart';
 import '../widgets/low_fi_card.dart';
 import 'confirmation_screen.dart';
@@ -74,6 +75,7 @@ class CartScreen extends StatelessWidget {
                                 fontSize: 17,
                               ),
                             ),
+                            Text(item.food.outlet),
                             Text(
                               'PHP ${item.food.price.toStringAsFixed(2)} each',
                             ),
@@ -83,8 +85,7 @@ class CartScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8,
-                              crossAxisAlignment:
-                                  WrapCrossAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 OutlinedButton(
                                   onPressed: () {
@@ -111,9 +112,7 @@ class CartScreen extends StatelessWidget {
                                   },
                                   child: const Text(
                                     'Remove',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                    ),
+                                    style: TextStyle(color: Colors.black),
                                   ),
                                 ),
                               ],
@@ -146,11 +145,16 @@ class CartScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     WireframeButton(
                       label: 'Place Order',
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        final ticket = await viewModel.placeOrder();
+
+                        if (!context.mounted || ticket == null) return;
+
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (_) => ConfirmationScreen(
+                              ticket: ticket,
                               viewModel: viewModel,
                             ),
                           ),

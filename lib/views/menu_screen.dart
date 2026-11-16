@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+
 import '../viewmodels/food_to_go_viewmodel.dart';
 import '../widgets/low_fi_card.dart';
 import 'cart_screen.dart';
@@ -56,10 +57,9 @@ class MenuScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Select your food and add it to your cart.',
-          ),
+          const Text('Select food and add it to your cart.'),
           const SizedBox(height: 16),
+
           ...foods.map((food) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -86,10 +86,33 @@ class MenuScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+
+                    AnimatedBuilder(
+                      animation: viewModel,
+                      builder: (context, child) {
+                        return IconButton(
+                          tooltip: 'Add to favorites',
+                          onPressed: () {
+                            viewModel.toggleFavorite(food);
+                          },
+                          icon: Icon(
+                            viewModel.isFavorite(food.id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: viewModel.isFavorite(food.id)
+                                ? Colors.red
+                                : Colors.black,
+                          ),
+                        );
+                      },
+                    ),
+
                     WireframeButton(
                       label: 'Add',
-                      onPressed: () {
-                        viewModel.addToCart(food);
+                      onPressed: () async {
+                        await viewModel.addToCart(food);
+
+                        if (!context.mounted) return;
 
                         ScaffoldMessenger.of(context)
                           ..hideCurrentSnackBar()

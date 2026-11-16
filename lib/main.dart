@@ -1,9 +1,11 @@
 
 import 'package:flutter/material.dart';
+
 import 'viewmodels/food_to_go_viewmodel.dart';
 import 'views/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const FoodToGoApp());
 }
 
@@ -16,11 +18,14 @@ class FoodToGoApp extends StatefulWidget {
 
 class _FoodToGoAppState extends State<FoodToGoApp> {
   late final FoodToGoViewModel viewModel;
+  late final Future<void> initialization;
 
   @override
   void initState() {
     super.initState();
+
     viewModel = FoodToGoViewModel();
+    initialization = viewModel.initialize();
   }
 
   @override
@@ -48,7 +53,28 @@ class _FoodToGoAppState extends State<FoodToGoApp> {
           centerTitle: false,
         ),
       ),
-      home: HomeScreen(viewModel: viewModel),
+      home: FutureBuilder<void>(
+        future: initialization,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Unable to load saved app data.'),
+              ),
+            );
+          }
+
+          return HomeScreen(viewModel: viewModel);
+        },
+      ),
     );
   }
 }
