@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -88,17 +87,36 @@ class FoodToGoViewModel extends ChangeNotifier {
   final Set<int> _favorites = {};
   final List<OrderTicket> _tickets = [];
 
+  // STATUS CYCLE
+
+  static const List<String> ticketStatuses = [
+    'Pending',
+    'Preparing',
+    'Ready',
+    'Completed',
+  ];
+
+  // GETTERS
+
   List<CartItem> get cartItems => _cart.values.toList();
 
-  List<OrderTicket> get tickets => List.unmodifiable(_tickets);
+  // Active tickets only.
+  List<OrderTicket> get tickets => activeTickets;
+
+  List<OrderTicket> get activeTickets => List.unmodifiable(
+        _tickets.where((ticket) => !ticket.isArchived),
+      );
+
+  List<OrderTicket> get archivedTickets => List.unmodifiable(
+        _tickets.where((ticket) => ticket.isArchived),
+      );
 
   List<FoodItem> get favoriteFoods =>
       foods.where((food) => _favorites.contains(food.id)).toList();
 
   bool isFavorite(int foodId) => _favorites.contains(foodId);
 
-  int get cartCount =>
-      _cart.values.fold(0, (sum, item) => sum + item.quantity);
+  int get cartCount => _cart.values.fold(0, (sum, item) => sum + item.quantity);
 
   double get totalPrice =>
       _cart.values.fold(0.0, (sum, item) => sum + item.subtotal);
@@ -128,7 +146,7 @@ class FoodToGoViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // JSON STORAGE
+  // SAVE DATA
 
   Future<void> _saveData() async {
     await _prefs.setString(
@@ -139,18 +157,24 @@ class FoodToGoViewModel extends ChangeNotifier {
     await _prefs.setString(
       'cart',
       jsonEncode(
-        _cart.values.map((item) => {
-          'foodId': item.food.id,
-          'quantity': item.quantity,
-        }).toList(),
+        _cart.values
+            .map((item) => {
+                  'foodId': item.food.id,
+                  'quantity': item.quantity,
+                })
+            .toList(),
       ),
     );
 
     await _prefs.setString(
       'tickets',
-      jsonEncode(_tickets.map((ticket) => ticket.toJson()).toList()),
+      jsonEncode(
+        _tickets.map((ticket) => ticket.toJson()).toList(),
+      ),
     );
   }
+
+  // LOAD FAVORITES
 
   void _loadFavorites() {
     final data = _prefs.getString('favorites');
@@ -164,6 +188,8 @@ class FoodToGoViewModel extends ChangeNotifier {
       _favorites.clear();
     }
   }
+
+  // LOAD CART
 
   void _loadCart() {
     final data = _prefs.getString('cart');
@@ -187,6 +213,8 @@ class FoodToGoViewModel extends ChangeNotifier {
       _cart.clear();
     }
   }
+
+  // LOAD TICKETS
 
   void _loadTickets() {
     final data = _prefs.getString('tickets');
@@ -286,7 +314,6 @@ class FoodToGoViewModel extends ChangeNotifier {
     );
 
     _tickets.insert(0, ticket);
-
     _cart.clear();
 
     notifyListeners();
@@ -295,17 +322,86 @@ class FoodToGoViewModel extends ChangeNotifier {
     return ticket;
   }
 
+  // FIND TICKET
+
+  OrderTicket? _findTicket(String ticketId) {
+    try {
+      return _tickets.firstWhere(
+        (ticket) => ticket.ticketId == ticketId,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // CYCLE TICKET STATUS
+  // Pending -> Preparing -> Ready -> Completed -> Pending
+
+  Future<void> cycleTicketStatus(String ticketId) async {
+    final ticket = _findTicket(ticketId);
+
+    if (ticket == null || ticket.isArchived) return;
+
+    final currentIndex = ticketStatuses.indexOf(ticket.status);
+
+    final nextIndex =
+        currentIndex == -1 ? 0 : (currentIndex + 1) % ticketStatuses.length;
+
+    ticket.status = ticketStatuses[nextIndex];
+
+    notifyListeners();
+    await _saveData();
+  }
+
+  // MANUAL STATUS UPDATE (KEPT FOR COMPATIBILITY)
+
   Future<void> updateTicketStatus(
     String ticketId,
     String newStatus,
   ) async {
-    final index = _tickets.indexWhere(
+    final ticket = _findTicket(ticketId);
+
+    if (ticket == null || ticket.isArchived) return;
+    if (!ticketStatuses.contains(newStatus)) return;
+
+    ticket.status = newStatus;
+
+    notifyListeners();
+    await _saveData();
+  }
+
+  // SOFT DELETE / ARCHIVE
+
+  Future<void> archiveTicket(String ticketId) async {
+    final ticket = _findTicket(ticketId);
+
+    if (ticket == null) return;
+
+    ticket.isArchived = true;
+
+    notifyListeners();
+    await _saveData();
+  }
+
+  // RESTORE ARCHIVED TICKET
+
+  Future<void> restoreTicket(String ticketId) async {
+    final ticket = _findTicket(ticketId);
+
+    if (ticket == null) return;
+
+    ticket.isArchived = false;
+
+    notifyListeners();
+    await _saveData();
+  }
+
+  // PERMANENT DELETE
+
+  Future<void> deleteTicket(String ticketId) async {
+    _tickets.removeWhere(
       (ticket) => ticket.ticketId == ticketId,
     );
-
-    if (index == -1) return;
-
-    _tickets[index].status = newStatus;
 
     notifyListeners();
     await _saveData();

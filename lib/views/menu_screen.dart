@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../viewmodels/food_to_go_viewmodel.dart';
@@ -59,7 +58,6 @@ class MenuScreen extends StatelessWidget {
           const SizedBox(height: 8),
           const Text('Select food and add it to your cart.'),
           const SizedBox(height: 16),
-
           ...foods.map((food) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -86,7 +84,6 @@ class MenuScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     AnimatedBuilder(
                       animation: viewModel,
                       builder: (context, child) {
@@ -106,7 +103,6 @@ class MenuScreen extends StatelessWidget {
                         );
                       },
                     ),
-
                     WireframeButton(
                       label: 'Add',
                       onPressed: () async {

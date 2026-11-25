@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../viewmodels/food_to_go_viewmodel.dart';
@@ -26,7 +25,29 @@ class FavoritesScreen extends StatelessWidget {
 
           if (favorites.isEmpty) {
             return const Center(
-              child: Text('You have no favorite foods yet.'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 60,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'You have no favorite foods yet.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Add foods from the menu to see them here.',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 
@@ -70,6 +91,13 @@ class FavoritesScreen extends StatelessWidget {
                               Text(
                                 'PHP ${food.price.toStringAsFixed(2)}',
                               ),
+                              Text(
+                                food.description,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
                               const Text(
                                 'Tap to view details',
                                 style: TextStyle(
@@ -85,8 +113,19 @@ class FavoritesScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             tooltip: 'Remove favorite',
-                            onPressed: () {
-                              viewModel.toggleFavorite(food);
+                            onPressed: () async {
+                              await viewModel.toggleFavorite(food);
+
+                              if (!context.mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${food.name} removed from favorites.',
+                                  ),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
                             },
                             icon: const Icon(
                               Icons.favorite,
@@ -95,17 +134,23 @@ class FavoritesScreen extends StatelessWidget {
                           ),
                           IconButton(
                             tooltip: 'Add to cart',
-                            onPressed: () {
-                              viewModel.addToCart(food);
+                            onPressed: () async {
+                              await viewModel.addToCart(food);
+
+                              if (!context.mounted) return;
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
                                     '${food.name} added to cart.',
                                   ),
+                                  duration: const Duration(seconds: 1),
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.add_shopping_cart),
+                            icon: const Icon(
+                              Icons.add_shopping_cart,
+                            ),
                           ),
                         ],
                       ),

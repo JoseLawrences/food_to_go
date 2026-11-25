@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'viewmodels/food_to_go_viewmodel.dart';

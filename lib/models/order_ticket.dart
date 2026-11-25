@@ -1,5 +1,4 @@
-
-import 'food_item.dart';
+//import 'food_item.dart';
 
 class OrderTicket {
   final String ticketId;
@@ -7,6 +6,7 @@ class OrderTicket {
   final List<TicketItem> items;
   final double total;
   String status;
+  bool isArchived;
 
   OrderTicket({
     required this.ticketId,
@@ -14,6 +14,7 @@ class OrderTicket {
     required this.items,
     required this.total,
     this.status = 'Pending',
+    this.isArchived = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +24,7 @@ class OrderTicket {
       'items': items.map((item) => item.toJson()).toList(),
       'total': total,
       'status': status,
+      'isArchived': isArchived,
     };
   }
 
@@ -35,6 +37,7 @@ class OrderTicket {
           .toList(),
       total: (json['total'] as num).toDouble(),
       status: json['status'] ?? 'Pending',
+      isArchived: json['isArchived'] ?? false,
     );
   }
 }

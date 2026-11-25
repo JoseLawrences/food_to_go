@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../viewmodels/food_to_go_viewmodel.dart';
@@ -60,7 +59,6 @@ class HomeScreen extends StatelessWidget {
             'Choose your favorite food and order ahead.',
           ),
           const SizedBox(height: 16),
-
           Row(
             children: [
               Expanded(
@@ -98,15 +96,12 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 24),
-
           const Text(
             'AVAILABLE OUTLETS',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-
           ...viewModel.outlets.map((outlet) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),

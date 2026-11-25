@@ -1,4 +1,3 @@
-
 import 'food_item.dart';
 
 class CartItem {
